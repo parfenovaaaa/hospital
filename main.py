@@ -1,22 +1,7 @@
 from collections import Counter
 
-GET_STATUS_COMMANDS = ["get status", "узнать статус", "1"]
-STATUS_UP_COMMANDS = ["status up", "повысить статус", "2"]
-STATUS_DOWN_COMMANDS = ["status down", "понизить статус", "3"]
-DISCHARGE_COMMANDS = ["discharge", "выписать", "4"]
-STATISTICS_COMMANDS = ["calculate statistics", "посчитать статистику", "5"]
-STOP_COMMANDS = ["stop", "стоп"]
-COMMANDS = (
-        GET_STATUS_COMMANDS + STATUS_UP_COMMANDS + STATUS_DOWN_COMMANDS + DISCHARGE_COMMANDS + STATISTICS_COMMANDS
-)
-YES_COMMANDS = ["yes", "y", "да"]
-
-PATIENT_STATUS = {
-    0: "Тяжело болен",
-    1: "Болен",
-    2: "Слегка болен",
-    3: "Готов к выписке",
-}
+from constants import PATIENT_STATUS, STATUS_UP_COMMANDS, YES_COMMANDS, STATUS_DOWN_COMMANDS, DISCHARGE_COMMANDS, \
+    GET_STATUS_COMMANDS, STATISTICS_COMMANDS, COMMANDS, STOP_COMMANDS
 
 
 class HospitalPatientAccounting:
@@ -53,13 +38,12 @@ class HospitalPatientAccounting:
 
     def patient_discharge(self, patient_id: int) -> None:
         self.patients_db.pop(patient_id)
-        print(f"Пациент выписан")
+        print(f"Пациент выписан из больницы")
 
     @staticmethod
     def get_patient_id() -> int | None:
         print("Введите ID пациента:")
-        patient_id = input()
-        patient_id = int(patient_id)
+        patient_id = int(input())
         if patient_id <= 0:
             raise ValueError
         elif patient_id > 200:
@@ -83,7 +67,7 @@ class HospitalPatientAccounting:
                 return
             self.patient_status_execute(command, patient_id)
 
-    def start_patient_accounting(self):
+    def start_patient_accounting(self) -> None:
         while True:
             print("Введите команду:")
             command = input()
@@ -91,5 +75,4 @@ class HospitalPatientAccounting:
 
 
 if __name__ == '__main__':
-    hpa = HospitalPatientAccounting()
-    hpa.start_patient_accounting()
+    HospitalPatientAccounting().start_patient_accounting()
