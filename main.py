@@ -51,7 +51,7 @@ class HospitalPatientAccounting:
                 print("Ошибка! Нет пациента с таким ID")
                 return
             else:
-                return patient_id - 1
+                return patient_id
         except ValueError:
             print("Ошибка! ID пациента должно быть числом(целым и положительным)")
             return
@@ -63,7 +63,7 @@ class HospitalPatientAccounting:
             self.calculate_statistics()
         else:
             patient_id = self.get_patient_id()
-            self.patient_status_execute(command, patient_id) if patient_id else None
+            self.patient_status_execute(command, patient_id - 1) if patient_id else None
 
     def start_patient_accounting(self) -> None:
         while True:
