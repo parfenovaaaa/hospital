@@ -1,13 +1,13 @@
 from collections import Counter
 
-GET_STATUS_COMMANDS = ["Get status", "1"]
-STATUS_UP_COMMANDS = ["status up", "2"]
-STATUS_DOWN_COMMANDS = ["status down", "3"]
-DISCHARGE_COMMANDS = ["discharge", "4"]
-STATISTICS_COMMANDS = ["calculate statistics", "5"]
-STOP_COMMANDS = ["stop"]
+GET_STATUS_COMMANDS = ["get status", "узнать статус", "1"]
+STATUS_UP_COMMANDS = ["status up", "повысить статус", "2"]
+STATUS_DOWN_COMMANDS = ["status down", "понизить статус", "3"]
+DISCHARGE_COMMANDS = ["discharge", "выписать", "4"]
+STATISTICS_COMMANDS = ["calculate statistics", "посчитать статистику", "5"]
+STOP_COMMANDS = ["stop", "стоп"]
 COMMANDS = (
-        GET_STATUS_COMMANDS + STATUS_UP_COMMANDS + STATUS_DOWN_COMMANDS + DISCHARGE_COMMANDS + STATISTICS_COMMANDS + STOP_COMMANDS
+        GET_STATUS_COMMANDS + STATUS_UP_COMMANDS + STATUS_DOWN_COMMANDS + DISCHARGE_COMMANDS + STATISTICS_COMMANDS
 )
 YES_COMMANDS = ["yes", "y", "да"]
 
@@ -21,73 +21,74 @@ PATIENT_STATUS = {
 PATIENT_DB = [1 for i in range(0, 200)]
 
 
-def check_patient_id(patient_id):
-    patient_id = int(patient_id)
-    if patient_id < 0:
-        raise ValueError
-    elif patient_id > 200:
-        print("Ошибка! Нет пациента с таким ID")  #  TODO  а как прервать то
-    else:
-        return patient_id
-
-
-def calculate_statistics():
+def calculate_statistics() -> None:
     counter = Counter(PATIENT_DB)
-    statistics = []
-    [statistics.append(f"в статусе '{PATIENT_STATUS[i]}': {counter[i]} чел.") for i in range(0, 4) if counter[i] > 0]
-    print(statistics)
+    print(f"В больнице сейчас {len(PATIENT_DB)} чел., из них:")
+    [print(f"в статусе '{PATIENT_STATUS[i]}': {counter[i]} чел.") for i in range(0, 4) if counter[i] > 0]
 
 
-def patient_status_execute(command):
-    print("Please, input patient id:")
-    patient_id = input()
-    try:
-        patient_id = check_patient_id(patient_id)
-    except ValueError:
-        print("Ошибка! ID пациента должно быть числом(целым и положительным)")
-        return
+def patient_status_execute(command: str, patient_id: int) -> None:
+    new_patient_status_msg = "Новый статус пациента: '{}'"
     patient_status = PATIENT_DB[patient_id]
+
     if command in GET_STATUS_COMMANDS:
-        print(f"Статус пациента: {PATIENT_STATUS[patient_status]}")
+        print(f"Статус пациента: '{PATIENT_STATUS[patient_status]}'")
     elif command in STATUS_UP_COMMANDS:
         if patient_status == 3:
-            print("Выписать пациента?")
+            print("Выписать пациента? (да/нет)")
             result = input()
-            if result in YES_COMMANDS:
-                patient_discharge(patient_id)
-            else:
-                print("Пациент остался в статусе ")
-                return
+            no_change_msg = f"Пациент остался в статусе '{PATIENT_STATUS[PATIENT_DB[patient_id]]}'"
+            patient_discharge(patient_id) if result in YES_COMMANDS else print(no_change_msg)
         else:
             PATIENT_DB[patient_id] = PATIENT_DB[patient_id] + 1
-            print(f"Новый ствтус {PATIENT_STATUS[PATIENT_DB[patient_id]]} ")
+            print(new_patient_status_msg.format(PATIENT_STATUS[PATIENT_DB[patient_id]]))
     elif command in STATUS_DOWN_COMMANDS:
         if patient_status == 0:
-            print("Не может умиреть ")
+            print("Ошибка. Нельзя понизить самый низкий статус (наши пациенты не умирают)")
         else:
             PATIENT_DB[patient_id] = PATIENT_DB[patient_id] - 1
-            print(f"Новый ствтус {PATIENT_STATUS[PATIENT_DB[patient_id]]} ")
+            print(new_patient_status_msg.format(PATIENT_STATUS[PATIENT_DB[patient_id]]))
     elif command in DISCHARGE_COMMANDS:
         patient_discharge(patient_id)
 
 
-def patient_discharge(patient_id):
+def patient_discharge(patient_id: int) -> None:
         PATIENT_DB.pop(patient_id)
         print(f"Пациент выписан")
 
 
-def execute_command(command: str):
+def get_patient_id() -> int | None:
+    print("Введите ID пациента:")
+    patient_id = input()
+    patient_id = int(patient_id)
+    if patient_id <= 0:
+        raise ValueError
+    elif patient_id > 200:
+        raise AssertionError
+    else:
+        return patient_id - 1
+
+
+def execute_command(command: str) -> None:
     if command not in COMMANDS:
         print("Неизвестная команда! Попробуйте еще раз!")
     elif command in STATISTICS_COMMANDS:
         calculate_statistics()
     else:
-        patient_status_execute(command)
+        try:
+            patient_id = get_patient_id()
+        except ValueError:
+            print("Ошибка! ID пациента должно быть числом(целым и положительным)")
+            return
+        except AssertionError:
+            print("Ошибка! Нет пациента с таким ID")
+            return
+        patient_status_execute(command, patient_id)
 
 
 def start_hospital():
     while True:
-        print("Please, input command:")
+        print("Введите команду:")
         command = input()
         exit() if command in STOP_COMMANDS else execute_command(command)
 
