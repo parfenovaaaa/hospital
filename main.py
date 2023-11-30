@@ -43,13 +43,18 @@ class HospitalPatientAccounting:
     @staticmethod
     def get_patient_id() -> int | None:
         print("Введите ID пациента:")
-        patient_id = int(input())
-        if patient_id <= 0:
-            raise ValueError
-        elif patient_id > 200:
-            raise AssertionError
-        else:
-            return patient_id - 1
+        try:
+            patient_id = int(input())
+            if patient_id <= 0:
+                raise ValueError
+            elif patient_id > 200:
+                print("Ошибка! Нет пациента с таким ID")
+                return
+            else:
+                return patient_id - 1
+        except ValueError:
+            print("Ошибка! ID пациента должно быть числом(целым и положительным)")
+            return
 
     def execute_command(self, command: str) -> None:
         if command not in COMMANDS:
@@ -57,15 +62,8 @@ class HospitalPatientAccounting:
         elif command in STATISTICS_COMMANDS:
             self.calculate_statistics()
         else:
-            try:
-                patient_id = self.get_patient_id()
-            except ValueError:
-                print("Ошибка! ID пациента должно быть числом(целым и положительным)")
-                return
-            except AssertionError:
-                print("Ошибка! Нет пациента с таким ID")
-                return
-            self.patient_status_execute(command, patient_id)
+            patient_id = self.get_patient_id()
+            self.patient_status_execute(command, patient_id) if patient_id else None
 
     def start_patient_accounting(self) -> None:
         while True:
