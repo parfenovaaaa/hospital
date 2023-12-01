@@ -2,7 +2,7 @@ from collections import Counter
 from typing import Union
 
 from constants import PATIENT_STATUS, STATUS_UP_COMMANDS, YES_COMMANDS, STATUS_DOWN_COMMANDS, DISCHARGE_COMMANDS, \
-    GET_STATUS_COMMANDS, STATISTICS_COMMANDS, COMMANDS, STOP_COMMANDS, NEW_PATIENT_STATUS_MSG
+    GET_STATUS_COMMANDS, STATISTICS_COMMANDS, COMMANDS, STOP_COMMANDS, NEW_PATIENT_STATUS_MSG, STATUS_DOWN_ERROR_MSG
 
 
 class HospitalPatientAccounting:
@@ -26,7 +26,7 @@ class HospitalPatientAccounting:
 
     @staticmethod
     def patient_status_down_error() -> str:
-        return "Ошибка. Нельзя понизить самый низкий статус (наши пациенты не умирают)"
+        return STATUS_DOWN_ERROR_MSG
 
     def patient_status_down_execute(self, patient_id: int) -> None:
         self.patients_db[patient_id] = self.patients_db[patient_id] - 1
@@ -68,7 +68,8 @@ class HospitalPatientAccounting:
         if command not in COMMANDS:
             print("Неизвестная команда! Попробуйте еще раз!")
         elif command in STATISTICS_COMMANDS:
-            HospitalStatistics().calculate_statistics()
+            msg = HospitalStatistics().calculate_statistics()
+            print(msg)
         else:
             patient_id = self.get_patient_id()
             self.patient_status_execute(command, patient_id - 1) if patient_id else None
@@ -85,10 +86,10 @@ class HospitalPatientAccounting:
 
 
 class HospitalStatistics(HospitalPatientAccounting):
-    def calculate_statistics(self) -> None:
+    def calculate_statistics(self) -> str:
         counter, patients_count = self.calculate_statistics_raw_data()
         strings = self.create_calculate_statistics_output(counter, patients_count)
-        print(strings)
+        return strings
 
     def calculate_statistics_raw_data(self) -> [Counter, int]:
         return Counter(self.patients_db), len(self.patients_db)
