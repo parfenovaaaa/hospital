@@ -1,4 +1,5 @@
 from collections import Counter
+from typing import Union
 
 from constants import PATIENT_STATUS, STATUS_UP_COMMANDS, YES_COMMANDS, STATUS_DOWN_COMMANDS, DISCHARGE_COMMANDS, \
     GET_STATUS_COMMANDS, STATISTICS_COMMANDS, COMMANDS, STOP_COMMANDS, NEW_PATIENT_STATUS_MSG
@@ -43,7 +44,7 @@ class HospitalPatientAccounting:
         print(f"Пациент выписан из больницы")
 
     @staticmethod
-    def get_patient_id() -> int | None:
+    def get_patient_id() -> Union[int, None]:
         try:
             patient_id = int(input("Введите ID пациента:"))
             if patient_id <= 0:
