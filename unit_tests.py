@@ -78,6 +78,7 @@ class TestsCalculateStatistics:
             self.hpa.calculate_statistics()
             actual_msg = "".join([mock_get.call_args_list[i][0][0] for i in range(len(mock_get.call_args_list))])
             assert expected_msg == actual_msg
+            assert len(self.hpa.patients_db) == 200 - to_del
 
     def test_statistics_clear_db(self):
         with patch('builtins.print') as mock_get:
@@ -86,3 +87,4 @@ class TestsCalculateStatistics:
             self.hpa.calculate_statistics()
             actual_msg = "".join([mock_get.call_args_list[i][0][0] for i in range(len(mock_get.call_args_list))])
             assert expected_msg == actual_msg
+            assert not len(self.hpa.patients_db)
