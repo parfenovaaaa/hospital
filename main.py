@@ -1,4 +1,5 @@
 from collections import Counter
+from typing import Union
 
 from constants import PATIENT_STATUS, STATUS_UP_COMMANDS, YES_COMMANDS, STATUS_DOWN_COMMANDS, DISCHARGE_COMMANDS, \
     GET_STATUS_COMMANDS, STATISTICS_COMMANDS, COMMANDS, STOP_COMMANDS, NEW_PATIENT_STATUS_MSG
@@ -6,11 +7,6 @@ from constants import PATIENT_STATUS, STATUS_UP_COMMANDS, YES_COMMANDS, STATUS_D
 
 class HospitalPatientAccounting:
     patients_db = [1 for i in range(0, 200)]
-
-    def calculate_statistics(self) -> None:
-        counter = Counter(self.patients_db)
-        print(f"В больнице сейчас {len(self.patients_db)} чел., из них:")
-        [print(f"\tв статусе '{PATIENT_STATUS[i]}': {counter[i]} чел.") for i in range(0, 4) if counter[i] > 0]
 
     def patient_status_up(self, patient_id: int) -> None:
         if self.patients_db[patient_id] == 3:
@@ -21,12 +17,22 @@ class HospitalPatientAccounting:
             self.patients_db[patient_id] = self.patients_db[patient_id] + 1
             print(NEW_PATIENT_STATUS_MSG.format(PATIENT_STATUS[self.patients_db[patient_id]]))
 
-    def patient_status_down(self, patient_id: int) -> None:
+    def patient_status_down(self, patient_id: int) -> str:
         if self.patients_db[patient_id] == 0:
-            print("Ошибка. Нельзя понизить самый низкий статус (наши пациенты не умирают)")
+            return self.patient_status_down_error()
         else:
-            self.patients_db[patient_id] = self.patients_db[patient_id] - 1
-            print(NEW_PATIENT_STATUS_MSG.format(PATIENT_STATUS[self.patients_db[patient_id]]))
+            self.patient_status_down_execute(patient_id)
+            return self.create_status_changed_msg(patient_id)
+
+    @staticmethod
+    def patient_status_down_error() -> str:
+        return "Ошибка. Нельзя понизить самый низкий статус (наши пациенты не умирают)"
+
+    def patient_status_down_execute(self, patient_id: int) -> None:
+        self.patients_db[patient_id] = self.patients_db[patient_id] - 1
+
+    def create_status_changed_msg(self, patient_id: int) -> str:
+        return NEW_PATIENT_STATUS_MSG.format(PATIENT_STATUS[self.patients_db[patient_id]])
 
     def patient_status_execute(self, command: str, patient_id: int) -> None:
         if command in GET_STATUS_COMMANDS:
@@ -34,7 +40,8 @@ class HospitalPatientAccounting:
         elif command in STATUS_UP_COMMANDS:
             self.patient_status_up(patient_id)
         elif command in STATUS_DOWN_COMMANDS:
-            self.patient_status_down(patient_id)
+            msg = self.patient_status_down(patient_id)
+            print(msg)
         elif command in DISCHARGE_COMMANDS:
             self.patient_discharge(patient_id)
 
@@ -43,7 +50,7 @@ class HospitalPatientAccounting:
         print(f"Пациент выписан из больницы")
 
     @staticmethod
-    def get_patient_id() -> int | None:
+    def get_patient_id() -> Union[int, None]:
         try:
             patient_id = int(input("Введите ID пациента:"))
             if patient_id <= 0:
@@ -61,7 +68,7 @@ class HospitalPatientAccounting:
         if command not in COMMANDS:
             print("Неизвестная команда! Попробуйте еще раз!")
         elif command in STATISTICS_COMMANDS:
-            self.calculate_statistics()
+            HospitalStatistics().calculate_statistics()
         else:
             patient_id = self.get_patient_id()
             self.patient_status_execute(command, patient_id - 1) if patient_id else None
@@ -75,6 +82,21 @@ class HospitalPatientAccounting:
         while True:
             command = input("Введите команду:")
             self.shut_down_hospital_accounting() if command in STOP_COMMANDS else self.execute_command(command)
+
+
+class HospitalStatistics(HospitalPatientAccounting):
+    def calculate_statistics(self) -> None:
+        counter, patients_count = self.calculate_statistics_raw_data()
+        strings = self.create_calculate_statistics_output(counter, patients_count)
+        print(strings)
+
+    def calculate_statistics_raw_data(self) -> [Counter, int]:
+        return Counter(self.patients_db), len(self.patients_db)
+
+    @staticmethod
+    def create_calculate_statistics_output(counter: Counter, patient_count: int) -> str:
+        count_list = [f"\n\tв статусе '{PATIENT_STATUS[i]}': {counter[i]} чел." for i in range(0, 4) if counter[i] > 0]
+        return f"В больнице сейчас {patient_count} чел., из них:" + "".join(count_list)
 
 
 if __name__ == '__main__':
