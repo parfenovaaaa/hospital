@@ -19,12 +19,12 @@ class TestsStatusDown:
 
 class TestsCalculateStatistics:
     def test_statistics_raw_data(self):
-        hs = HospitalStatistics([1, 1, 3, 0])
+        hs = HospitalStatistics([2, 2, 3, 0])
         raw_data = hs.calculate_statistics_raw_data()
         assert raw_data["patients_amount"] == 4
-        assert dict(raw_data["statistics"]) == {0: 1, 1: 2, 3: 1}
+        assert dict(raw_data["statistics"]) == {0: 1, 2: 2, 3: 1}
 
-    def test_statistics_output_all_status(self):
+    def test_statistics_output(self):
         expected_statistics = {0: 1, 1: 2, 3: 1}
         expected_amount = 4
         hs = HospitalStatistics([1, 1, 3, 0])
@@ -34,14 +34,14 @@ class TestsCalculateStatistics:
             "в статусе 'Готов к выписке': 1 чел."
         )
 
-    def test_calculate_statistics_with_clear_db(self):
+    def test_statistics_raw_data_with_clear_db(self):
         hs = HospitalStatistics()
         hs.patients_db.clear()
         raw_data = hs.calculate_statistics_raw_data()
         assert raw_data["patients_amount"] == 0
         assert dict(raw_data["statistics"]) == {}
 
-    def test_statistics_output_with_clear_db_1(self):
+    def test_statistics_output_with_clear_db(self):
         hs = HospitalStatistics()
         hs.patients_db.clear()
         raw_data = hs.create_calculate_statistics_output(Counter({}), 0)
