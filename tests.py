@@ -19,7 +19,7 @@ class TestsStatusDown:
 
 class TestsCalculateStatistics:
     def test_statistics_raw_data(self):
-        hs = HospitalStatistics([3, 1, 1, 0])
+        hs = HospitalStatistics([1, 1, 3, 0])
         raw_data = hs.calculate_statistics_raw_data()
         assert raw_data["patients_amount"] == 4
         assert dict(raw_data["statistics"]) == {0: 1, 1: 2, 3: 1}
@@ -27,7 +27,7 @@ class TestsCalculateStatistics:
     def test_statistics_output_all_status(self):
         expected_statistics = {0: 1, 1: 2, 3: 1}
         expected_amount = 4
-        hs = HospitalStatistics([3, 1, 1, 0])
+        hs = HospitalStatistics([1, 1, 3, 0])
         actual_msg = hs.create_calculate_statistics_output(Counter(expected_statistics), expected_amount)
         assert actual_msg.replace("\n\t", "") == (
             "В больнице сейчас 4 чел., из них:в статусе 'Тяжело болен': 1 чел.в статусе 'Болен': 2 чел."
