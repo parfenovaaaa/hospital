@@ -1,6 +1,6 @@
 class DialogWithUser:
     @staticmethod
-    def get_msg_to_user(msg_to_user) -> str:
+    def get_msg_from_user(msg_to_user) -> str:
         command = input(msg_to_user)
         return command
 
