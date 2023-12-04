@@ -1,3 +1,5 @@
+from collections import Counter
+
 from main import HospitalPatientAccounting, HospitalStatistics
 
 
@@ -16,24 +18,31 @@ class TestsStatusDown:
 
 
 class TestsCalculateStatistics:
-    def test_statistics_same_status(self):
-        expected_msg = f"В больнице сейчас 4 чел., из них:в статусе 'Болен': 4 чел."
-        hs = HospitalStatistics([1, 1, 1, 1])
-        actual_msg = hs.calculate_statistics()
-        assert expected_msg == actual_msg.replace("\n\t", "")
+    def test_statistics_raw_data(self):
+        hs = HospitalStatistics([3, 1, 1, 0])
+        raw_data = hs.calculate_statistics_raw_data()
+        assert raw_data["patients_amount"] == 4
+        assert dict(raw_data["statistics"]) == {0: 1, 1: 2, 3: 1}
 
-    def test_statistics_all_status(self):
-        expected_msg = (
-            "В больнице сейчас 4 чел., из них:в статусе 'Тяжело болен': 1 чел.в статусе 'Болен': 1 чел."
-            "в статусе 'Слегка болен': 1 чел.в статусе 'Готов к выписке': 1 чел."
+    def test_statistics_output_all_status(self):
+        expected_statistics = {0: 1, 1: 2, 3: 1}
+        expected_amount = 4
+        hs = HospitalStatistics([3, 1, 1, 0])
+        actual_msg = hs.create_calculate_statistics_output(Counter(expected_statistics), expected_amount)
+        assert actual_msg.replace("\n\t", "") == (
+            "В больнице сейчас 4 чел., из них:в статусе 'Тяжело болен': 1 чел.в статусе 'Болен': 2 чел."
+            "в статусе 'Готов к выписке': 1 чел."
         )
-        hs = HospitalStatistics([0, 1, 2, 3])
-        actual_msg = hs.calculate_statistics()
-        assert expected_msg == actual_msg.replace("\n\t", "")
 
-    def test_statistics_with_clear_db(self):
-        expected_msg = "В больнице сейчас 0 чел., из них:"
-        hs = HospitalStatistics([])
+    def test_calculate_statistics_with_clear_db(self):
+        hs = HospitalStatistics()
         hs.patients_db.clear()
-        actual_msg = hs.calculate_statistics()
-        assert expected_msg == actual_msg
+        raw_data = hs.calculate_statistics_raw_data()
+        assert raw_data["patients_amount"] == 0
+        assert dict(raw_data["statistics"]) == {}
+
+    def test_statistics_output_with_clear_db_1(self):
+        hs = HospitalStatistics()
+        hs.patients_db.clear()
+        raw_data = hs.create_calculate_statistics_output(Counter({}), 0)
+        assert raw_data == "В больнице сейчас 0 чел., из них:"

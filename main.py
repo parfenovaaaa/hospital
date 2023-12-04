@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Union
+from typing import Union, Dict
 
 from constants import PATIENT_STATUS, STATUS_UP_COMMANDS, YES_COMMANDS, STATUS_DOWN_COMMANDS, DISCHARGE_COMMANDS, \
     GET_STATUS_COMMANDS, STATISTICS_COMMANDS, COMMANDS, STOP_COMMANDS, NEW_PATIENT_STATUS_MSG, STATUS_DOWN_ERROR_MSG
@@ -94,12 +94,12 @@ class HospitalStatistics(HospitalPatientAccounting):
         self.patients_db = patients_db
 
     def calculate_statistics(self) -> str:
-        counter, patients_count = self.calculate_statistics_raw_data()
-        strings = self.create_calculate_statistics_output(counter, patients_count)
+        raw_data = self.calculate_statistics_raw_data()
+        strings = self.create_calculate_statistics_output(raw_data["statistics"], raw_data["patients_amount"])
         return strings
 
-    def calculate_statistics_raw_data(self) -> [Counter, int]:
-        return Counter(self.patients_db), len(self.patients_db)
+    def calculate_statistics_raw_data(self) -> Dict:
+        return {"statistics": Counter(self.patients_db), "patients_amount": len(self.patients_db)}
 
     @staticmethod
     def create_calculate_statistics_output(counter: Counter, patient_count: int) -> str:
