@@ -35,12 +35,11 @@ class HospitalPatientAccounting:
             patient_id = self.get_patient_id()
             HospitalPatientStatus(self.patients_db).patient_status_execute(command, patient_id) if patient_id else None
 
-    @staticmethod
-    def shut_down_hospital_accounting() -> None:
-        DialogWithUser.send_msg_to_user("Сеанс завершён")
-        exit()
-
     def start_hospital_accounting(self) -> None:
         while True:
             command = DialogWithUser.get_msg_from_user("Введите команду:")
-            self.shut_down_hospital_accounting() if command in STOP_COMMANDS else self.execute_command(command)
+            if command in STOP_COMMANDS:
+                DialogWithUser.send_msg_to_user("Сеанс завершён")
+                break
+            else:
+                self.execute_command(command)
