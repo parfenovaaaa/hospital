@@ -25,20 +25,36 @@ class TestsStatusDown:
 
 
 class TestsCalculateStatistics:
-    def test_statistics_raw_data(self):
-        hs = HospitalStatistics([2, 2, 3, 0])
+    def test_get_statics_data_all_status(self):
+        hs = HospitalStatistics([2, 0, 1, 3, 0])
+        raw_data = hs._get_calculate_statistics_data()
+        assert raw_data["patients_amount"] == 5
+        assert dict(raw_data["statistics"]) == {0: 2, 1: 1, 2: 1, 3: 1}
+
+    def test_get_statics_data_different_status(self):
+        hs = HospitalStatistics([3, 0, 3, 3])
         raw_data = hs._get_calculate_statistics_data()
         assert raw_data["patients_amount"] == 4
-        assert dict(raw_data["statistics"]) == {0: 1, 2: 2, 3: 1}
+        assert dict(raw_data["statistics"]) == {0: 1, 3: 3}
 
-    def test_statistics_output(self):
-        expected_statistics = {0: 1, 1: 2, 3: 1}
-        expected_amount = 4
-        hs = HospitalStatistics([1, 1, 3, 0])
+    def test_statistics_output_all_status(self):
+        expected_statistics = {0: 2, 1: 1, 2: 1, 3: 1}
+        expected_amount = 5
+        hs = HospitalStatistics([2, 0, 1, 3, 0])
         actual_msg = hs._create_calculate_statistics_output(Counter(expected_statistics), expected_amount)
-        assert actual_msg.replace("\n\t", "") == (
-            "В больнице сейчас 4 чел., из них:в статусе 'Тяжело болен': 1 чел.в статусе 'Болен': 2 чел."
-            "в статусе 'Готов к выписке': 1 чел."
+        assert actual_msg == (
+            "В больнице сейчас 5 чел., из них:\n\tв статусе 'Тяжело болен': 2 чел.\n\tв статусе 'Болен': 1 чел."
+            "\n\tв статусе 'Слегка болен': 1 чел.\n\tв статусе 'Готов к выписке': 1 чел."
+        )
+
+    def test_get_statics_output_different_status(self):
+        expected_statistics = {0: 1, 3: 3}
+        expected_amount = 4
+        hs = HospitalStatistics([3, 0, 3, 3])
+        actual_msg = hs._create_calculate_statistics_output(Counter(expected_statistics), expected_amount)
+        assert actual_msg == (
+            "В больнице сейчас 4 чел., из них:\n\tв статусе 'Тяжело болен': 1 чел."
+            "\n\tв статусе 'Готов к выписке': 3 чел."
         )
 
     def test_statistics_raw_data_with_clear_db(self):
