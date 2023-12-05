@@ -3,20 +3,20 @@ from unittest.mock import MagicMock
 
 from DialogWithUser import DialogWithUser
 from HospitalStatistics import HospitalStatistics
-from main import HospitalPatientAccounting
+from HospitalPatientStatus import HospitalPatientStatus
 
 
 class TestsStatusDown:
     def test_status_down_complete(self):
         DialogWithUser.send_msg_to_user = MagicMock()
-        hpa = HospitalPatientAccounting([3, 1, 3,])
+        hpa = HospitalPatientStatus([3, 1, 3,])
         hpa.patient_status_down(patient_id=2)
         assert hpa.patients_db == [3, 0, 3]
         DialogWithUser.send_msg_to_user.assert_called_with("Новый статус пациента: 'Тяжело болен'")
 
     def test_status_down_error(self):
         DialogWithUser.send_msg_to_user = MagicMock()
-        hpa = HospitalPatientAccounting([1, 0, 1,])
+        hpa = HospitalPatientStatus([1, 0, 1,])
         hpa.patient_status_down(patient_id=2)
         assert hpa.patients_db == [1, 0, 1]
         DialogWithUser.send_msg_to_user.assert_called_with(
