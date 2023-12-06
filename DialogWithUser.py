@@ -1,6 +1,7 @@
 from typing import Union
 
-from constants import YES_COMMANDS, DB_SIZE
+from PatientIdError import PatientIdError
+from constants import YES_COMMANDS
 
 
 class DialogWithUser:
@@ -15,13 +16,14 @@ class DialogWithUser:
 
     @staticmethod
     def get_patient_id() -> Union[int, None]:
-        patient_id = int(DialogWithUser.get_msg_from_user("Введите ID пациента:"))
-        if patient_id <= 0:
-            raise ValueError("Ошибка! ID пациента должно быть числом(целым и положительным)")
-        elif patient_id > DB_SIZE:
-            raise ValueError("Ошибка! Нет пациента с таким ID")
-        else:
-            return patient_id
+        try:
+            patient_id = int(DialogWithUser.get_msg_from_user("Введите ID пациента:"))
+            if patient_id <= 0:
+                raise PatientIdError(value_error=True)
+            else:
+                return patient_id
+        except ValueError:
+            raise PatientIdError(value_error=True)
 
     @staticmethod
     def ask_discharge_patient():

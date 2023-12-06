@@ -1,3 +1,4 @@
+from PatientIdError import PatientIdError
 from DialogWithUser import DialogWithUser
 from PatientsDB import PatientsDB
 
@@ -18,18 +19,24 @@ class HospitalPatientStatus:
                 else:
                     status = PatientsDB().get_patient_status_by_id(patient_id)
                     DialogWithUser.send_msg_to_user(f"Пациент остался в статусе '{status}'")
-        except (ValueError, IndexError) as e:
-            DialogWithUser.send_msg_to_user(e.args[0])
-            return
+        except PatientIdError as e:
+            msg = (
+                "Ошибка! Нет пациента с таким ID"
+                if e.index_error else "Ошибка! ID пациента должно быть числом(целым и положительным)"
+            )
+            DialogWithUser.send_msg_to_user(msg)
 
     @staticmethod
     def get_patient_status():
         try:
             patient_id = DialogWithUser.get_patient_id()
             DialogWithUser.send_msg_to_user(f"Статус пациента: '{PatientsDB().get_patient_status_by_id(patient_id)}'")
-        except (ValueError, IndexError) as e:
-            DialogWithUser.send_msg_to_user(e.args[0])
-            return
+        except PatientIdError as e:
+            msg = (
+                "Ошибка! Нет пациента с таким ID"
+                if e.index_error else "Ошибка! ID пациента должно быть числом(целым и положительным)"
+            )
+            DialogWithUser.send_msg_to_user(msg)
 
     @staticmethod
     def patient_status_down() -> None:
@@ -41,9 +48,12 @@ class HospitalPatientStatus:
                 DialogWithUser.send_msg_to_user(f"Новый статус пациента: '{status}'")
             else:
                 DialogWithUser.send_msg_to_user("Ошибка. Нельзя понизить самый низкий статус(наши пациенты не умирают)")
-        except (ValueError, IndexError) as e:
-            DialogWithUser.send_msg_to_user(e.args[0])
-            return
+        except PatientIdError as e:
+            msg = (
+                "Ошибка! Нет пациента с таким ID"
+                if e.index_error else "Ошибка! ID пациента должно быть числом(целым и положительным)"
+            )
+            DialogWithUser.send_msg_to_user(msg)
 
     @staticmethod
     def patient_discharge(patient_id=None) -> None:
@@ -51,6 +61,9 @@ class HospitalPatientStatus:
             patient_id = patient_id if patient_id else DialogWithUser.get_patient_id()
             PatientsDB().discharge_patient_by_id(patient_id)
             DialogWithUser.send_msg_to_user(f"Пациент выписан из больницы")
-        except (ValueError, IndexError) as e:
-            DialogWithUser.send_msg_to_user(e.args[0])
-            return
+        except PatientIdError as e:
+            msg = (
+                "Ошибка! Нет пациента с таким ID"
+                if e.index_error else "Ошибка! ID пациента должно быть числом(целым и положительным)"
+            )
+            DialogWithUser.send_msg_to_user(msg)
