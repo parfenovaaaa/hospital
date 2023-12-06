@@ -1,5 +1,5 @@
 from DialogWithUser import DialogWithUser
-from HospitalPatientStatus import HospitalPatientStatus, patient_status_up
+from HospitalPatientStatus import HospitalPatientStatus
 from HospitalStatistics import HospitalStatistics
 from constants import STATISTICS_COMMANDS, COMMANDS, STOP_COMMANDS
 from constants import STATUS_UP_COMMANDS, STATUS_DOWN_COMMANDS, DISCHARGE_COMMANDS, \
@@ -22,7 +22,7 @@ class HospitalPatientAccounting:
             if command in GET_STATUS_COMMANDS:
                 HospitalPatientStatus().get_patient_status()
             elif command in STATUS_UP_COMMANDS:
-                patient_status_up()
+                HospitalPatientStatus().patient_status_up()
             elif command in STATUS_DOWN_COMMANDS:
                 HospitalPatientStatus().patient_status_down()
             elif command in DISCHARGE_COMMANDS:

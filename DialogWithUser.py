@@ -17,9 +17,9 @@ class DialogWithUser:
     def get_patient_id() -> Union[int, None]:
         patient_id = int(DialogWithUser.get_msg_from_user("Введите ID пациента:"))
         if patient_id <= 0:
-            raise ValueError
+            raise ValueError("Ошибка! ID пациента должно быть числом(целым и положительным)")
         elif patient_id > DB_SIZE:
-            raise IndexError
+            raise ValueError("Ошибка! Нет пациента с таким ID")
         else:
             return patient_id
 
