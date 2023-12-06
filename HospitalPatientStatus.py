@@ -1,51 +1,67 @@
 from DialogWithUser import DialogWithUser
-from constants import PATIENT_STATUS, STATUS_UP_COMMANDS, YES_COMMANDS, STATUS_DOWN_COMMANDS, DISCHARGE_COMMANDS, \
-    GET_STATUS_COMMANDS, NEW_PATIENT_STATUS_MSG, STATUS_DOWN_ERROR_MSG
+from PatientsDB import PatientsDB
+
+
+def patient_status_up() -> None:
+    try:
+        index = DialogWithUser.get_patient_id() - 1
+        if PatientsDB().can_make_status_up(index):
+            PatientsDB().make_patient_status_up(index)
+            DialogWithUser.send_msg_to_user(f"Новый статус пациента: '{PatientsDB().get_patient_status_by_id(index)}'")
+        else:
+            if DialogWithUser.ask_discharge_patient():
+                PatientsDB().discharge_patient_by_id(index)
+                DialogWithUser.send_msg_to_user(f"Пациент выписан из больницы")
+            else:
+                status = PatientsDB().get_patient_status_by_id(index)
+                DialogWithUser.send_msg_to_user(f"Пациент остался в статусе '{status}'")
+    except (TypeError, ValueError):
+        DialogWithUser.send_msg_to_user("Ошибка! ID пациента должно быть числом(целым и положительным)")
+        return
+    except IndexError:
+        DialogWithUser.send_msg_to_user("Ошибка! Нет пациента с таким ID")
+        return
 
 
 class HospitalPatientStatus:
-
-    def __init__(self, patients_db=None):
-        self.patients_db = patients_db if patients_db else []
-
-    def _patient_status_up(self, patient_id: int) -> None:
-        patient_index = patient_id - 1
-        if self.patients_db[patient_index] == 3:
-            result = input("Выписать пациента? (да/нет)")
-            no_change_msg = f"Пациент остался в статусе '{PATIENT_STATUS[self.patients_db[patient_index]]}'"
-            self._patient_discharge(patient_index) if result in YES_COMMANDS else DialogWithUser.send_msg_to_user(no_change_msg)
-        else:
-            self.patients_db[patient_index] = self.patients_db[patient_index] + 1
-            DialogWithUser.send_msg_to_user(self._create_status_changed_msg(patient_index))
-
-    def _patient_status_down(self, patient_id: int) -> None:
-        patient_index = patient_id - 1
-        if self.patients_db[patient_index] == 0:
-            DialogWithUser.send_msg_to_user(self._patient_status_down_error())
-        else:
-            self._patient_status_down_execute(patient_index)
-            DialogWithUser.send_msg_to_user(self._create_status_changed_msg(patient_index))
+    @staticmethod
+    def get_patient_status():
+        try:
+            index = DialogWithUser.get_patient_id()
+            DialogWithUser.send_msg_to_user(f"Статус пациента: '{PatientsDB().get_patient_status_by_id(index)}'")
+        except (TypeError, ValueError):
+            DialogWithUser.send_msg_to_user("Ошибка! ID пациента должно быть числом(целым и положительным)")
+            return
+        except IndexError:
+            DialogWithUser.send_msg_to_user("Ошибка! Нет пациента с таким ID")
+            return
 
     @staticmethod
-    def _patient_status_down_error() -> str:
-        return STATUS_DOWN_ERROR_MSG
+    def patient_status_down() -> None:
+        try:
+            patient_index = DialogWithUser.get_patient_id() - 1
+            if PatientsDB().can_make_status_down(patient_index):
+                PatientsDB().make_patient_status_down(patient_index)
+                status = PatientsDB().get_patient_status_by_id(patient_index)
+                DialogWithUser.send_msg_to_user(f"Новый статус пациента: '{status}'")
+            else:
+                DialogWithUser.send_msg_to_user("Ошибка. Нельзя понизить самый низкий статус(наши пациенты не умирают)")
+        except (TypeError, ValueError):
+            DialogWithUser.send_msg_to_user("Ошибка! ID пациента должно быть числом(целым и положительным)")
+            return
+        except IndexError:
+            DialogWithUser.send_msg_to_user("Ошибка! Нет пациента с таким ID")
+            return
 
-    def _patient_status_down_execute(self, patient_id: int) -> None:
-        self.patients_db[patient_id] = self.patients_db[patient_id] - 1
-
-    def _create_status_changed_msg(self, patient_id: int) -> str:
-        return NEW_PATIENT_STATUS_MSG.format(PATIENT_STATUS[self.patients_db[patient_id]])
-
-    def patient_status_execute(self, command: str, patient_id: int) -> None:
-        if command in GET_STATUS_COMMANDS:
-            DialogWithUser.send_msg_to_user(f"Статус пациента: '{PATIENT_STATUS[self.patients_db[patient_id - 1]]}'")
-        elif command in STATUS_UP_COMMANDS:
-            self._patient_status_up(patient_id)
-        elif command in STATUS_DOWN_COMMANDS:
-            self._patient_status_down(patient_id)
-        elif command in DISCHARGE_COMMANDS:
-            self._patient_discharge(patient_id)
-
-    def _patient_discharge(self, patient_id: int) -> None:
-        self.patients_db.pop(patient_id - 1)
-        DialogWithUser.send_msg_to_user(f"Пациент выписан из больницы")
+    @staticmethod
+    def patient_discharge(patient_id=None) -> None:
+        try:
+            patient_index = patient_id if patient_id else DialogWithUser.get_patient_id() - 1
+            PatientsDB().discharge_patient_by_id(patient_index)
+            DialogWithUser.send_msg_to_user(f"Пациент выписан из больницы")
+        except (TypeError, ValueError):
+            DialogWithUser.send_msg_to_user("Ошибка! ID пациента должно быть числом(целым и положительным)")
+            return
+        except IndexError:
+            DialogWithUser.send_msg_to_user("Ошибка! Нет пациента с таким ID")
+            return

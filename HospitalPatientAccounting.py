@@ -1,45 +1,30 @@
-from typing import Union
-
 from DialogWithUser import DialogWithUser
-from HospitalPatientStatus import HospitalPatientStatus
+from HospitalPatientStatus import HospitalPatientStatus, patient_status_up
 from HospitalStatistics import HospitalStatistics
 from constants import STATISTICS_COMMANDS, COMMANDS, STOP_COMMANDS
+from constants import STATUS_UP_COMMANDS, STATUS_DOWN_COMMANDS, DISCHARGE_COMMANDS, \
+    GET_STATUS_COMMANDS
 
 
 class HospitalPatientAccounting:
 
-    def __init__(self, patients_db=None):
-        self.patients_db = patients_db if patients_db else [1 for _ in range(0, 200)]
-
     @staticmethod
-    def get_patient_id() -> Union[int, None]:
-        try:
-            patient_id = int(DialogWithUser.get_msg_from_user("Введите ID пациента:"))
-            if patient_id <= 0:
-                raise ValueError
-            elif patient_id > 200:
-                DialogWithUser.send_msg_to_user("Ошибка! Нет пациента с таким ID")
-                return
-            else:
-                return patient_id
-        except ValueError:
-            DialogWithUser.send_msg_to_user("Ошибка! ID пациента должно быть числом(целым и положительным)")
-            return
-
-    def execute_command(self, command: str) -> None:
-        if command not in COMMANDS:
-            DialogWithUser.send_msg_to_user("Неизвестная команда! Попробуйте еще раз!")
-        elif command in STATISTICS_COMMANDS:
-            HospitalStatistics(self.patients_db).calculate_statistics()
-        else:
-            patient_id = self.get_patient_id()
-            HospitalPatientStatus(self.patients_db).patient_status_execute(command, patient_id) if patient_id else None
-
-    def start_hospital_accounting(self) -> None:
+    def start_hospital_accounting() -> None:
         while True:
             command = DialogWithUser.get_msg_from_user("Введите команду:")
             if command in STOP_COMMANDS:
                 DialogWithUser.send_msg_to_user("Сеанс завершён")
                 break
-            else:
-                self.execute_command(command)
+            elif command not in COMMANDS:
+                DialogWithUser.send_msg_to_user("Неизвестная команда! Попробуйте еще раз!")
+            elif command in STATISTICS_COMMANDS:
+                HospitalStatistics().calculate_statistics()
+            if command in GET_STATUS_COMMANDS:
+                HospitalPatientStatus().get_patient_status()
+            elif command in STATUS_UP_COMMANDS:
+                patient_status_up()
+            elif command in STATUS_DOWN_COMMANDS:
+                HospitalPatientStatus().patient_status_down()
+            elif command in DISCHARGE_COMMANDS:
+                HospitalPatientStatus().patient_discharge()
+
