@@ -15,7 +15,7 @@ def patient_status_up() -> None:
             else:
                 status = PatientsDB().get_patient_status_by_id(index)
                 DialogWithUser.send_msg_to_user(f"Пациент остался в статусе '{status}'")
-    except (TypeError, ValueError):
+    except ValueError:
         DialogWithUser.send_msg_to_user("Ошибка! ID пациента должно быть числом(целым и положительным)")
         return
     except IndexError:
@@ -29,7 +29,7 @@ class HospitalPatientStatus:
         try:
             index = DialogWithUser.get_patient_id()
             DialogWithUser.send_msg_to_user(f"Статус пациента: '{PatientsDB().get_patient_status_by_id(index)}'")
-        except (TypeError, ValueError):
+        except ValueError:
             DialogWithUser.send_msg_to_user("Ошибка! ID пациента должно быть числом(целым и положительным)")
             return
         except IndexError:
@@ -46,7 +46,7 @@ class HospitalPatientStatus:
                 DialogWithUser.send_msg_to_user(f"Новый статус пациента: '{status}'")
             else:
                 DialogWithUser.send_msg_to_user("Ошибка. Нельзя понизить самый низкий статус(наши пациенты не умирают)")
-        except (TypeError, ValueError):
+        except ValueError:
             DialogWithUser.send_msg_to_user("Ошибка! ID пациента должно быть числом(целым и положительным)")
             return
         except IndexError:
@@ -59,7 +59,7 @@ class HospitalPatientStatus:
             patient_index = patient_id if patient_id else DialogWithUser.get_patient_id() - 1
             PatientsDB().discharge_patient_by_id(patient_index)
             DialogWithUser.send_msg_to_user(f"Пациент выписан из больницы")
-        except (TypeError, ValueError):
+        except ValueError:
             DialogWithUser.send_msg_to_user("Ошибка! ID пациента должно быть числом(целым и положительным)")
             return
         except IndexError:
